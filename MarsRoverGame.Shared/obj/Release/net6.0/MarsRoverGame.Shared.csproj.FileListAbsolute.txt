@@ -1,0 +1,12 @@
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\bin\Release\net6.0\MarsRoverGame.Shared.deps.json
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\bin\Release\net6.0\MarsRoverGame.Shared.dll
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\bin\Release\net6.0\ref\MarsRoverGame.Shared.dll
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\bin\Release\net6.0\MarsRoverGame.Shared.pdb
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.csproj.AssemblyReference.cache
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.AssemblyInfoInputs.cache
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.AssemblyInfo.cs
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.csproj.CoreCompileInputs.cache
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.dll
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\ref\MarsRoverGame.Shared.dll
+C:\Users\fgol\source\repos\MarsRoverGame\MarsRoverGame.Shared\obj\Release\net6.0\MarsRoverGame.Shared.pdb
