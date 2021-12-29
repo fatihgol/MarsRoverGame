@@ -16,5 +16,8 @@ Satellite ve Houston modülleri paralel şekilde çalıştırılır. Houston mod
 -- Satellite projesi bilgiler EntityFramework MemoryDB üzerinde tutulmuştur. Dependency Injection örneğine Services/RoverService.cs ve Services/SatelliteService.cs ulaşabilirsiniz. Yapılan diğer tüm işlemler Controllers/OrbitController.cs altından ulaşabilirsiniz.
 -- Rover projesinde işlevsel bir kod bloğu bulunmamaktadır. Sadece her bir rover için instance oluşturularak iletişim kurması örneklenmiştir.
 
+
 ## Projeyi Windows ortamda <Launch.bat> üzerinden çalıştırabilirsiniz
+
+-- Çalıştırma öncesi sertifika hatası alırsanız <TrustCerts.bat> dosyasını çalıştırdıktan sonra deneyebilirsiniz.
 
