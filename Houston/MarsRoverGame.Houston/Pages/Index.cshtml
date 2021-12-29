@@ -1,0 +1,347 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Mars Satellite Interface";
+}
+
+<style>
+    #console {
+        overflow-y: scroll;
+        height: 430px;
+        background-color: #e9ecef;
+    }
+
+    #mainBody, #satelliteLoaderError {
+        display: none;
+    }
+</style>
+
+<div class="row" id="mainBody">
+    <div class="row">
+        <div class="col-9 mb-3">
+            <input type="email" class="form-control" id="command" placeholder="Enter Command">
+        </div>
+        <div class="col-3 mb-3 d-grid">
+            <button type="submit" class="btn btn-primary" id="send" onclick="SendCommand(this)">Send Command</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-9 mb-3">
+            <div class="mb-3">
+                <label for="console" class="form-label">Console</label>
+                <div class="card">
+                    <div class="card-body" id="console"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="mb-3">
+                <label for="infoCard" class="form-label">Informations</label>
+                <div id="infoCard" class="card">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Plateau Size</div>
+                                <div id="infPlateauSize">Not set</div>
+                            </div>
+                            <span class="badge bg-primary">Max 50x50</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Rovers Count</div>
+                                <div id="infRoversCount">0</div>
+                                <div id="roverList"></div>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">Max 10</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">Subheading</div>
+                                Content for list item
+                            </div>
+                            <span class="badge bg-primary rounded-pill">14</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div id="satelliteLoader" class="alert alert-primary" role="alert">
+    Connecting to satellite. Please wait...
+</div>
+
+<div id="satelliteLoaderError" class="alert alert-danger" role="alert">
+    Unable to connect to satellite. Check the links. 
+</div>
+
+
+<script>
+
+    var SatelliteApiUrl = "https://localhost:7601/api";
+
+    var satelliteConnnected = false;
+    var satelliteConnnectionTestCount = 0;
+    var isCommandCycleDone = false;
+    var isPlateauSizeSet = false;
+    var currentRover = 0;
+    var rovers = [];
+
+    var satelliteConsole;
+
+
+    (function() {
+
+        satelliteConsole = document.getElementById("console");
+
+        var input = document.getElementById("command");
+
+        input.addEventListener("keyup", function(event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("send").click();
+          }else{
+              input.value = input.value.toUpperCase();
+          }
+        });
+
+        CheckSatelliteConnection();
+
+    })();
+
+
+    function SendCommand(button){
+        var input = document.getElementById("command");
+
+        var commandText = input.value;
+
+
+        if(commandText && !isPlateauSizeSet){
+            SetPlateauSize(commandText);
+        }else if(commandText){
+            MoveTheRover(commandText);
+        }
+
+
+        input.value = "";
+    }
+
+
+    function CheckSatelliteConnection(){
+        if(satelliteConnnectionTestCount++ < 4){
+            var requestOptions = {
+              method: 'GET',
+              redirect: 'follow'
+            };
+
+            fetch(SatelliteApiUrl+"/Orbit/ping", requestOptions)
+              .then(response => {
+                if(response.status == 200){
+                    satelliteConnnected = true;
+                    document.getElementById("satelliteLoader").style = "display:none";
+                    document.getElementById("mainBody").style = "display:flex";
+
+                    GetPlateuSize();
+
+                }else{
+                    setTimeout(() => CheckSatelliteConnection(), 1000);
+                }
+              })
+              .catch(error => setTimeout(() => CheckSatelliteConnection(), 1000));
+      }else{
+          document.getElementById("satelliteLoader").style = "display:none";
+          document.getElementById("satelliteLoaderError").style = "display:block";
+      }
+    }
+
+
+    function GetPlateuSize(){
+        var requestOptions = {
+          method: 'GET',
+          redirect: 'follow'
+        };
+
+        fetch(SatelliteApiUrl+"/Orbit/GetPlateauSize", requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            if(result.isSuccessful){
+                if(result.data){
+                    document.getElementById("infPlateauSize").innerHTML = result.data.value;
+                    isPlateauSizeSet = true;
+                    GetActiveRovers(true);
+                }
+            }else{
+                alert(result.errors.join(','));
+            }
+          })
+          .catch(error => console.log('error', error));
+    }
+
+
+    function SetPlateauSize(command){
+
+        AddConsoleMessage("<h6><span class='badge bg-success'>command</span> / <span class='badge bg-warning'>setPlateauSize</span> "+command+"</h6>");
+        
+        data = command.split(' ');
+
+        if(data.length == 2 && isValidInt(data[0]) && isValidInt(data[1])){
+
+            var reqHeaders = new Headers();
+            reqHeaders.append("Content-Type", "application/json");
+
+            var raw = JSON.stringify({
+                "xSize": parseInt(data[0]),
+                "ySize": parseInt(data[1])
+            });
+
+            var requestOptions = {
+                method: 'POST',
+                headers: reqHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+
+            fetch(SatelliteApiUrl+"/Orbit/SetPlateauSize", requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    if(result.isSuccessful){
+                        if(result.data){
+                            document.getElementById("infPlateauSize").innerHTML = result.data.value;
+                            isPlateauSizeSet = true;
+                            GetActiveRovers();
+                        }
+                    }
+                    printSatelliteMessage(result);
+                })
+                .catch(error => console.log('error', error));
+        }else{
+            AddConsoleMessage("<h6><span class='badge bg-info'>local</span> / <span class='badge bg-danger'>error</span> Wrong command. please enter the correct command.</h6>");
+        }
+    }
+
+    function GetActiveRovers(hideMessage){
+        var requestOptions = {
+              method: 'GET',
+              redirect: 'follow'
+            };
+
+            fetch(SatelliteApiUrl+"/Orbit/GetActiveRovers", requestOptions)
+              .then(response => response.json())
+              .then(result => {
+                    if(result.isSuccessful){
+                        document.getElementById("infRoversCount").innerHTML = result.data.length;
+                        rovers = result.data;
+
+                        GetCurrentRover(hideMessage);
+                    }
+                    
+                    if(hideMessage != true)
+                        printSatelliteMessage(result);
+              })
+              .catch(error => console.log('error', error));
+    }
+
+    function GetCurrentRover(hideMessage){
+        var requestOptions = {
+              method: 'GET',
+              redirect: 'follow'
+            };
+
+            fetch(SatelliteApiUrl+"/Orbit/GetActiveRover?roverId="+rovers[currentRover].roverId, requestOptions)
+              .then(response => response.json())
+              .then(result => {
+                    if(result.isSuccessful){
+
+                    }
+                    //if(hideMessage != true)
+                    printSatelliteMessage(result);
+              })
+              .catch(error => console.log('error', error));
+    }
+
+    function MoveTheRover(command){
+
+        AddConsoleMessage("<h6><span class='badge bg-success'>command</span> / <span class='badge bg-warning'>MoveTheRover</span> "+command+"</h6>");
+        
+
+        if(data.length > 0 && isValidMoveCommand(command)){
+
+            var reqHeaders = new Headers();
+            reqHeaders.append("Content-Type", "application/json");
+
+            var raw = JSON.stringify({
+                "roverId": rovers[currentRover].roverId,
+                "command": command
+            });
+
+
+            var requestOptions = {
+                method: 'POST',
+                headers: reqHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+
+            fetch(SatelliteApiUrl+"/Orbit/MoveTheRover", requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    if(result.isSuccessful){
+                        if(result.data){
+                            currentRover++;
+
+                            if(currentRover == rovers.length){
+                                currentRover = 0;
+                                isPlateauSizeSet = false;
+                            }
+
+                            GetCurrentRover();
+                        }
+                    }
+                    printSatelliteMessage(result);
+                })
+                .catch(error => console.log('error', error));
+        }else{
+            AddConsoleMessage("<h6><span class='badge bg-info'>local</span> / <span class='badge bg-danger'>error</span> Wrong command. please enter the correct command.</h6>");
+        }
+    }
+
+    function AddConsoleMessage(message){
+        satelliteConsole.innerHTML = satelliteConsole.innerHTML + message;
+        satelliteConsole.scrollTop = satelliteConsole.scrollHeight;
+    }
+
+    function printSatelliteMessage(result){
+        if(result.isSuccessful){
+            if(result.data){
+                AddConsoleMessage("<h6><span class='badge bg-secondary'>satellite</span> / <span class='badge bg-primary'>message</span> "+result.message+"</h6>");
+            }
+        }else{
+            if(Array.isArray(result.errors))
+                AddConsoleMessage("<h6><span class='badge bg-secondary'>satellite</span> / <span class='badge bg-danger'>error</span> "+result.errors.join(',')+"</h6>");
+            else if(typeof result.errors === 'string' || result.errors instanceof String)
+                AddConsoleMessage("<h6><span class='badge bg-secondary'>satellite</span> / <span class='badge bg-danger'>error</span> "+result.errors+"</h6>");
+            else{
+
+                var message =  "<h6><span class='badge bg-secondary'>satellite</span> / <span class='badge bg-danger'>error</span> <div>"
+                            
+                Object.keys(result.errors).forEach(err => {
+                    message += result.errors[err] +"<br>";
+                }); 
+                
+                message += "</div></h6>";
+                AddConsoleMessage(message);
+            }
+        }
+    }
+
+    function isValidInt(str) {
+        return /^\+?\d+$/.test(str);
+    }
+
+    function isValidMoveCommand(str){
+        return /^\+?[MRL]+$/.test(str)
+    }
+</script>
