@@ -1,6 +1,8 @@
 # MarsRoverGame
 Case Study
 
+![Gif](https://i.imgur.com/2G8awvs.gif)
+
 ## Proje Detayları
 Proje 3 ana yapıdan oluşmaktadır.
 - Houston -> Web Interface
@@ -17,9 +19,9 @@ Satellite ve Houston modülleri paralel şekilde çalıştırılır. Houston mod
 - Rover projesinde işlevsel bir kod bloğu bulunmamaktadır. Sadece her bir rover için instance oluşturularak iletişim kurması örneklenmiştir.
 
 
+
 > Projeyi Windows ortamda <Launch.bat> üzerinden çalıştırabilirsiniz
 
 > Çalıştırma öncesi sertifika hatası alırsanız <TrustCerts.bat> dosyasını çalıştırdıktan sonra deneyebilirsiniz.
 
-![This is an image](https://imgur.com/2G8awvs)
 
